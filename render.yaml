@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: OBLDIGITAL_DASHBOARD
+    env: python
+    plan: free
+    buildCommand: pip install -r scripts/requirements.txt
+    startCommand: gunicorn scripts.dashboard_dep_rtn_app:server
+
+Added render.yaml configuration for Render deployment
+

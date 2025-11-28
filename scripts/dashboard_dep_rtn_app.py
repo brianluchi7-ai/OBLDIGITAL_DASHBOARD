@@ -100,7 +100,7 @@ app.layout = html.Div(
         "padding": "20px",
     },
     children=[
-        html.H1("📊 DASHBOARD DEP FTD", style={
+        html.H1("📊 DASHBOARD DEP RTN", style={
             "textAlign": "center",
             "color": "#D4AF37",
             "marginBottom": "30px",
@@ -160,9 +160,9 @@ html.Div(
                         html.Div(
                             style={"display": "flex", "justifyContent": "space-around"},
                             children=[
-                                html.Div(id="indicador-usuarios", style={"width": "20%"}),
-                                html.Div(id="indicador-usd", style={"width": "20%"}),
-                                html.Div(id="indicador-target", style={"width": "20%"}),
+                                html.Div(id="indicador-usuarios", style={"width": "30%"}),
+                                html.Div(id="indicador-usd", style={"width": "30%"}),
+                                html.Div(id="indicador-target", style={"width": "30%"}),
                             ],
                         ),
                         html.Br(),
@@ -244,18 +244,18 @@ def actualizar_dashboard(start, end, team, agent, country, affiliate, id_user):
     }
 
     indicador_usuarios = html.Div([
-        html.H4("MOUNT USERS", style={"color": "#D4AF37", "fontWeight": "bold", "marginBottom": "5px"}),
-        html.H2(f"{total_users:,}", style={"color": "#FFFFFF", "fontSize": "36px", "margin": "0"})
+        html.H4("MOUNT USERS", style={"color": "#D4AF37", "fontWeight": "bold"}),
+        html.H2(f"{total_users:,}", style={"color": "#FFFFFF", "fontSize": "36px"})
     ], style=card_style)
 
     indicador_usd = html.Div([
-        html.H4("TOTAL USD", style={"color": "#D4AF37", "fontWeight": "bold", "marginBottom": "5px"}),
-        html.H2(formato_km(total_usd), style={"color": "#FFFFFF", "fontSize": "36px", "margin": "0"})
+        html.H4("TOTAL USD", style={"color": "#D4AF37", "fontWeight": "bold"}),
+        html.H2(formato_km(total_usd), style={"color": "#FFFFFF", "fontSize": "36px"})
     ], style=card_style)
 
     indicador_target = html.Div([
-        html.H4("TARGET", style={"color": "#D4AF37", "fontWeight": "bold", "marginBottom": "5px"}),
-        html.H2(formato_km(target), style={"color": "#FFFFFF", "fontSize": "36px", "margin": "0"})
+        html.H4("TARGET", style={"color": "#D4AF37", "fontWeight": "bold"}),
+        html.H2(formato_km(target), style={"color": "#FFFFFF", "fontSize": "36px"})
     ], style=card_style)
 
 
@@ -280,6 +280,7 @@ def actualizar_dashboard(start, end, team, agent, country, affiliate, id_user):
 
 if __name__ == "__main__":
     app.run_server(host="0.0.0.0", port=8050, debug=True)
+
 
 
 

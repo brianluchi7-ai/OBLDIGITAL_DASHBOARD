@@ -221,7 +221,7 @@ def actualizar_dashboard(start, end, team, agent, country, affiliate, id_user):
         "backgroundColor": "#1a1a1a",
         "borderRadius": "10px",
         "padding": "20px",
-        "width": "80%",
+        "width": "100%",
         "textAlign": "center",
         "boxShadow": "0 0 10px rgba(212,175,55,0.3)",
     }
@@ -257,5 +257,6 @@ def actualizar_dashboard(start, end, team, agent, country, affiliate, id_user):
 # === 9️⃣ Servidor principal (funciona local y en Render) ===
 if __name__ == "__main__":
     app.run_server(host="0.0.0.0", port=8051, debug=True)
+
 
 

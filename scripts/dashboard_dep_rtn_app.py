@@ -162,6 +162,7 @@ app.layout = html.Div(
                             ],
                         ),
                         html.Br(),
+                        
                         html.H4("📋 Detalle de transacciones", style={"color": "#D4AF37"}),
                         dash_table.DataTable(
                             id="tabla-detalle",
@@ -226,18 +227,18 @@ def actualizar_dashboard(start, end, team, agent, country, affiliate, id_user):
     }
 
     indicador_usuarios = html.Div([
-        html.H4("MOUNT USERS", style={"color": "#D4AF37", "fontWeight": "bold"}),
-        html.H2(f"{total_users:,}", style={"color": "#FFFFFF", "fontSize": "36px"})
+        html.H4("MOUNT USERS", style={"color": "#D4AF37", "fontWeight": "bold", "marginBottom": "5px"}),
+        html.H2(f"{total_users:,}", style={"color": "#FFFFFF", "fontSize": "36px", "margin": "0"})
     ], style=card_style)
 
     indicador_usd = html.Div([
-        html.H4("TOTAL USD", style={"color": "#D4AF37", "fontWeight": "bold"}),
-        html.H2(formato_km(total_usd), style={"color": "#FFFFFF", "fontSize": "36px"})
+        html.H4("TOTAL USD", style={"color": "#D4AF37", "fontWeight": "bold", "marginBottom": "5px"}),
+        html.H2(formato_km(total_usd), style={"color": "#FFFFFF", "fontSize": "36px", "margin": "0"})
     ], style=card_style)
 
     indicador_target = html.Div([
-        html.H4("TARGET", style={"color": "#D4AF37", "fontWeight": "bold"}),
-        html.H2(formato_km(target), style={"color": "#FFFFFF", "fontSize": "36px"})
+        html.H4("TARGET", style={"color": "#D4AF37", "fontWeight": "bold", "marginBottom": "5px"}),
+        html.H2(formato_km(target), style={"color": "#FFFFFF", "fontSize": "36px", "margin": "0"})
     ], style=card_style)
 
     fig_country = px.pie(df_filtrado, names="country", values="usd", title="USD by Country", color_discrete_sequence=px.colors.sequential.YlOrBr)
@@ -256,4 +257,5 @@ def actualizar_dashboard(start, end, team, agent, country, affiliate, id_user):
 # === 9️⃣ Servidor principal (funciona local y en Render) ===
 if __name__ == "__main__":
     app.run_server(host="0.0.0.0", port=8051, debug=True)
+
 

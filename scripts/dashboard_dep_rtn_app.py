@@ -160,9 +160,9 @@ html.Div(
                         html.Div(
                             style={"display": "flex", "justifyContent": "space-around"},
                             children=[
-                                html.Div(id="indicador-usuarios", style={"width": "30%"}),
-                                html.Div(id="indicador-usd", style={"width": "30%"}),
-                                html.Div(id="indicador-target", style={"width": "30%"}),
+                                html.Div(id="indicador-usuarios", style={"width": "20%"}),
+                                html.Div(id="indicador-usd", style={"width": "20%"}),
+                                html.Div(id="indicador-target", style={"width": "20%"}),
                             ],
                         ),
                         html.Br(),
@@ -280,6 +280,7 @@ def actualizar_dashboard(start, end, team, agent, country, affiliate, id_user):
 
 if __name__ == "__main__":
     app.run_server(host="0.0.0.0", port=8050, debug=True)
+
 
 
 

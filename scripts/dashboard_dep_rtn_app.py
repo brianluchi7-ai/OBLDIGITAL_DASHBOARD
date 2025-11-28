@@ -3,6 +3,7 @@ import pandas as pd
 import dash
 from dash import html, dcc, Input, Output, dash_table
 import plotly.express as px
+import plotly.graph_objects as go
 from conexion_mysql import crear_conexion
 
 # ======================================================
@@ -50,6 +51,7 @@ def limpiar_usd(valor):
     if pd.isna(valor): return 0.0
     s = str(valor).strip()
     if s == "": return 0.0
+
     s = re.sub(r"[^\d,.\-]", "", s)
     if "." in s and "," in s:
         if s.rfind(",") > s.rfind("."):
@@ -61,6 +63,7 @@ def limpiar_usd(valor):
         s = s.replace(",", ".") if len(partes[-1]) == 2 else s.replace(",", "")
     elif s.count(".") > 1:
         s = s.replace(".", "")
+
     try: return float(s)
     except: return 0.0
 
@@ -97,7 +100,7 @@ app.layout = html.Div(
         "padding": "20px",
     },
     children=[
-        html.H1("📊 DASHBOARD DEP RTN", style={
+        html.H1("📊 DASHBOARD DEP FTD", style={
             "textAlign": "center",
             "color": "#D4AF37",
             "marginBottom": "30px",
@@ -107,39 +110,50 @@ app.layout = html.Div(
         html.Div(
             style={"display": "flex", "justifyContent": "space-between"},
             children=[
-                html.Div(
-                    style={
-                        "width": "25%",
-                        "backgroundColor": "#1a1a1a",
-                        "padding": "20px",
-                        "borderRadius": "12px",
-                        "boxShadow": "0 0 15px rgba(212,175,55,0.3)",
-                        "textAlign": "center"
-                    },
-                    children=[
-                        html.H4("Date", style={"color": "#D4AF37", "textAlign": "center"}),
-                        dcc.DatePickerRange(
-                            id="filtro-fecha",
-                            start_date=fecha_min,
-                            end_date=fecha_max,
-                            display_format="YYYY-MM-DD",
-                            style={"marginBottom": "20px", "textAlign": "center"},
-                        ),
-                        html.Div([
-                            html.Label("Team", style={"color": "#D4AF37", "fontWeight": "bold"}),
-                            dcc.Dropdown(sorted(df["team"].dropna().unique()), [], multi=True, id="filtro-team"),
-                            html.Label("Agent", style={"color": "#D4AF37", "fontWeight": "bold"}),
-                            dcc.Dropdown(sorted(df["agent"].dropna().unique()), [], multi=True, id="filtro-agent"),
-                            html.Label("Country", style={"color": "#D4AF37", "fontWeight": "bold"}),
-                            dcc.Dropdown(sorted(df["country"].dropna().unique()), [], multi=True, id="filtro-country"),
-                            html.Label("Affiliate", style={"color": "#D4AF37", "fontWeight": "bold"}),
-                            dcc.Dropdown(sorted(df["affiliate"].dropna().unique()), [], multi=True, id="filtro-affiliate"),
-                            html.Label("ID", style={"color": "#D4AF37", "fontWeight": "bold"}),
-                            dcc.Dropdown(sorted(df["id"].dropna().unique()), [], multi=True, id="filtro-id"),
-                        ]),
-                    ],
-                ),
+                # --- Panel de Filtros ---
+                # --- Panel de Filtros ---
+html.Div(
+    style={
+        "width": "25%",
+        "backgroundColor": "#1a1a1a",
+        "padding": "20px",
+        "borderRadius": "12px",
+        "boxShadow": "0 0 15px rgba(212,175,55,0.3)",
+        "textAlign": "center"
+    },
+    children=[
+        html.H4("Date", style={"color": "#D4AF37", "textAlign": "center"}),
 
+        dcc.DatePickerRange(
+            id="filtro-fecha",
+            start_date=fecha_min,
+            end_date=fecha_max,
+            display_format="YYYY-MM-DD",
+            style={"marginBottom": "20px", "textAlign": "center"},
+        ),
+
+        # === Etiquetas centradas debajo del DatePickerRange ===
+        html.Div([
+            html.Label("Team", style={"color": "#D4AF37", "fontWeight": "bold", "display": "block", "textAlign": "center"}),
+            dcc.Dropdown(sorted(df["team"].dropna().unique()), [], multi=True, id="filtro-team"),
+
+            html.Label("Agent", style={"color": "#D4AF37", "fontWeight": "bold", "display": "block", "textAlign": "center"}),
+            dcc.Dropdown(sorted(df["agent"].dropna().unique()), [], multi=True, id="filtro-agent"),
+
+            html.Label("Country", style={"color": "#D4AF37", "fontWeight": "bold", "display": "block", "textAlign": "center"}),
+            dcc.Dropdown(sorted(df["country"].dropna().unique()), [], multi=True, id="filtro-country"),
+
+            html.Label("Affiliate", style={"color": "#D4AF37", "fontWeight": "bold", "display": "block", "textAlign": "center"}),
+            dcc.Dropdown(sorted(df["affiliate"].dropna().unique()), [], multi=True, id="filtro-affiliate"),
+
+            html.Label("ID", style={"color": "#D4AF37", "fontWeight": "bold", "display": "block", "textAlign": "center"}),
+            dcc.Dropdown(sorted(df["id"].dropna().unique()), [], multi=True, id="filtro-id"),
+        ], style={"textAlign": "center"}),
+    ],
+),
+
+
+                # --- Panel de contenido ---
                 html.Div(
                     style={"width": "72%"},
                     children=[
@@ -152,6 +166,7 @@ app.layout = html.Div(
                             ],
                         ),
                         html.Br(),
+
                         html.Div(
                             style={"display": "flex", "flexWrap": "wrap", "gap": "20px"},
                             children=[
@@ -162,7 +177,7 @@ app.layout = html.Div(
                             ],
                         ),
                         html.Br(),
-                        
+
                         html.H4("📋 Detalle de transacciones", style={"color": "#D4AF37"}),
                         dash_table.DataTable(
                             id="tabla-detalle",
@@ -179,6 +194,7 @@ app.layout = html.Div(
     ],
 )
 
+# === 8️⃣ Callback principal ===
 @app.callback(
     [
         Output("indicador-usuarios", "children"),
@@ -217,11 +233,12 @@ def actualizar_dashboard(start, end, team, agent, country, affiliate, id_user):
     total_users = df_filtrado["id"].nunique()
     target = total_usd * 1.1
 
+    # === Indicadores tipo GAUGE (estilo Power BI) ===
     card_style = {
         "backgroundColor": "#1a1a1a",
         "borderRadius": "10px",
         "padding": "20px",
-        "width": "100%",
+        "width": "80%",
         "textAlign": "center",
         "boxShadow": "0 0 10px rgba(212,175,55,0.3)",
     }
@@ -241,22 +258,31 @@ def actualizar_dashboard(start, end, team, agent, country, affiliate, id_user):
         html.H2(formato_km(target), style={"color": "#FFFFFF", "fontSize": "36px", "margin": "0"})
     ], style=card_style)
 
+
+    # === Gráficos ===
     fig_country = px.pie(df_filtrado, names="country", values="usd", title="USD by Country", color_discrete_sequence=px.colors.sequential.YlOrBr)
     fig_affiliate = px.pie(df_filtrado, names="affiliate", values="usd", title="USD by Affiliate", color_discrete_sequence=px.colors.sequential.YlOrBr)
     fig_team = px.bar(df_filtrado.groupby("team", as_index=False)["usd"].sum(), x="team", y="usd", title="USD by Team", color="usd", color_continuous_scale="YlOrBr")
     fig_usd_date = px.line(df_filtrado.sort_values("date"), x="date", y="usd", title="USD by Date", markers=True, color_discrete_sequence=["#D4AF37"])
 
     for fig in [fig_country, fig_affiliate, fig_team, fig_usd_date]:
-        fig.update_layout(paper_bgcolor="#0d0d0d", plot_bgcolor="#0d0d0d", font_color="#f2f2f2", title_font_color="#D4AF37")
+        fig.update_layout(
+            paper_bgcolor="#0d0d0d",
+            plot_bgcolor="#0d0d0d",
+            font_color="#f2f2f2",
+            title_font_color="#D4AF37"
+        )
 
     tabla_data = df_filtrado.to_dict("records")
 
     return indicador_usuarios, indicador_usd, indicador_target, fig_country, fig_affiliate, fig_team, fig_usd_date, tabla_data
 
 
-# === 9️⃣ Servidor principal (funciona local y en Render) ===
 if __name__ == "__main__":
-    app.run_server(host="0.0.0.0", port=8051, debug=True)
+    app.run_server(host="0.0.0.0", port=8050, debug=True)
+
+
+
 
 
 

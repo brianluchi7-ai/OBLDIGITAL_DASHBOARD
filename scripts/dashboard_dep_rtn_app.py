@@ -94,6 +94,7 @@ external_scripts = [
 ]
 
 app = dash.Dash(__name__, external_scripts=external_scripts)
+server = app.server  # 🔥 Necesario para Render
 app.title = "OBL Digital — DEP RTN Dashboard"
 
 # === 7️⃣ Layout con tema oscuro y dorado ===
@@ -322,4 +323,5 @@ def actualizar_dashboard(start, end, team, agent, country, affiliate, id_user):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=8051)
+    app.run_server(debug=True, port=8051)
+

@@ -69,7 +69,7 @@ def limpiar_usd(valor):
 df["usd"] = df["usd"].apply(limpiar_usd)
 
 # === 4️⃣ Limpieza de texto ===
-for col in ["team", "agent", "country", "affiliate", "id"]:
+for col in ["team", "agent", "country", "affiliate", "id", "source"]:
     if col in df.columns:
         df[col] = df[col].astype(str).str.strip().str.title()
         df[col].replace({"Nan": None, "None": None, "": None}, inplace=True)
@@ -93,7 +93,7 @@ external_scripts = [
 ]
 
 app = dash.Dash(__name__, external_scripts=external_scripts)
-server = app.server  # Necesario para Render
+server = app.server
 app.title = "OBL Digital — DEP RTN Dashboard"
 
 # === 7️⃣ Layout ===
@@ -146,6 +146,9 @@ app.layout = html.Div(
 
                             html.Label("Affiliate", style={"color": "#D4AF37", "fontWeight": "bold"}),
                             dcc.Dropdown(sorted(df["affiliate"].dropna().unique()), [], multi=True, id="filtro-affiliate"),
+
+                            html.Label("Source", style={"color": "#D4AF37", "fontWeight": "bold"}),
+                            dcc.Dropdown(sorted(df["source"].dropna().unique()), [], multi=True, id="filtro-source"),
 
                             html.Label("ID", style={"color": "#D4AF37", "fontWeight": "bold"}),
                             dcc.Dropdown(sorted(df["id"].dropna().unique()), [], multi=True, id="filtro-id"),
@@ -213,10 +216,11 @@ app.layout = html.Div(
         Input("filtro-agent", "value"),
         Input("filtro-country", "value"),
         Input("filtro-affiliate", "value"),
+        Input("filtro-source", "value"),
         Input("filtro-id", "value"),
     ],
 )
-def actualizar_dashboard(start, end, team, agent, country, affiliate, id_user):
+def actualizar_dashboard(start, end, team, agent, country, affiliate, source, id_user):
     df_filtrado = df.copy()
 
     if start and end:
@@ -227,12 +231,19 @@ def actualizar_dashboard(start, end, team, agent, country, affiliate, id_user):
     if agent: df_filtrado = df_filtrado[df_filtrado["agent"].isin(agent)]
     if country: df_filtrado = df_filtrado[df_filtrado["country"].isin(country)]
     if affiliate: df_filtrado = df_filtrado[df_filtrado["affiliate"].isin(affiliate)]
+    if source: df_filtrado = df_filtrado[df_filtrado["source"].isin(source)]
     if id_user: df_filtrado = df_filtrado[df_filtrado["id"].isin(id_user)]
 
+    # 🔹 Total USD
     total_usd = df_filtrado["usd"].sum()
-    total_users = df_filtrado["id"].nunique()
+
+    # 🔹 Total de transacciones (filas) — Mount Users
+    total_users = len(df_filtrado)
+
+    # 🔹 Target estimado
     target = total_usd * 1.1
 
+    # === Tarjetas ===
     card_style = {
         "backgroundColor": "#1a1a1a",
         "borderRadius": "10px",
@@ -257,6 +268,7 @@ def actualizar_dashboard(start, end, team, agent, country, affiliate, id_user):
         html.H2(formato_km(target), style={"color": "#FFFFFF", "fontSize": "36px"})
     ], style=card_style)
 
+    # === Gráficos ===
     fig_country = px.pie(df_filtrado, names="country", values="usd", title="USD by Country", color_discrete_sequence=px.colors.sequential.YlOrBr)
     fig_affiliate = px.pie(df_filtrado, names="affiliate", values="usd", title="USD by Affiliate", color_discrete_sequence=px.colors.sequential.YlOrBr)
     fig_team = px.bar(df_filtrado.groupby("team", as_index=False)["usd"].sum(), x="team", y="usd", title="USD by Team", color="usd", color_continuous_scale="YlOrBr")
@@ -268,7 +280,7 @@ def actualizar_dashboard(start, end, team, agent, country, affiliate, id_user):
     return indicador_usuarios, indicador_usd, indicador_target, fig_country, fig_affiliate, fig_team, fig_usd_date, df_filtrado.to_dict("records")
 
 
-# === 9️⃣ Captura PDF/PPT desde iframe ===
+# === 9️⃣ HTML personalizado ===
 app.index_string = '''
 <!DOCTYPE html>
 <html>
@@ -277,7 +289,6 @@ app.index_string = '''
   <title>OBL Digital — Dashboard RTN</title>
   {%favicon%}
   {%css%}
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
   {%app_entry%}
@@ -286,30 +297,9 @@ app.index_string = '''
     {%scripts%}
     {%renderer%}
   </footer>
-
-  <script>
-    window.addEventListener("message", async (event) => {
-      if (!event.data || event.data.action !== "capture_dashboard") return;
-
-      try {
-        const canvas = await html2canvas(document.body, { useCORS: true, scale: 2, backgroundColor: "#0d0d0d" });
-        const imgData = canvas.toDataURL("image/png");
-
-        window.parent.postMessage({
-          action: "capture_image",
-          img: imgData,
-          filetype: event.data.type
-        }, "*");
-      } catch (err) {
-        console.error("Error al capturar dashboard:", err);
-        window.parent.postMessage({ action: "capture_done" }, "*");
-      }
-    });
-  </script>
 </body>
 </html>
 '''
 
 if __name__ == "__main__":
     app.run_server(debug=True, port=8051)
-
